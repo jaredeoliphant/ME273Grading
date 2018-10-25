@@ -1,0 +1,140 @@
+/**
+* This is the function that will generate the random assignments
+* based on who actually submitted the assignment
+*/
+function generatePeerGradingAssignments_() {
+  
+  // get all the data out that I need
+  // ------------------------------------------------------------------
+  var ss = SpreadsheetApp.getActiveSpreadsheet()
+  
+  
+  // check and make sure that "Roster" exists
+  var roster = ss.getSheetByName("Roster")
+  if (!roster){
+    Browser.msgBox("Roster doesn't exist", "Expected to see a sheet named 'Roster', cancelling the script...", Browser.Buttons.OK)
+    return}
+  var rosterData = roster.getSheetValues(2, 1, roster.getLastRow()-1, roster.getLastColumn())
+  
+  
+  // check and make sure that "No/Late Submissions" exists
+  var nosubmitSheet = ss.getSheetByName("No/Late Submissions")
+  if (!nosubmitSheet){
+    Browser.msgBox("No/Late Submissions doesn't exist", "Expected to see a sheet named 'No/Late Submissions', make sure you run 'Check who submitted first. cancelling the script...", Browser.Buttons.OK)
+    return}
+  var nosubmitData = nosubmitSheet.getDataRange().getValues()
+  
+  
+  // make a new sheet only if needed
+  var peerAssignSheet = ss.getSheetByName("Peer Grading Assignments")
+  if (!peerAssignSheet){
+    var peerAssignSheet = ss.insertSheet("Peer Grading Assignments")}
+  else{
+    peerAssignSheet.clear()}
+  peerAssignSheet.activate()
+  
+  
+  /**
+  * number of students each person should grade is only thing that needs to be changed for a new HW
+  ********************************************************/
+  var numGrade = 3;
+  /*******************************************************/
+  
+  
+  
+  
+  // First, create the peer assignments grading assuming that everyone submitted 
+  // ----------------------------------------------------------------
+  // the while loop allows us to repeat the spreadsheet creation if it doesn't work 
+  didntwork = 1;
+  while(didntwork == 1){
+    didntwork = 0;  // reset didntwork flag
+    
+    finalspreadsheet = []
+    
+    for(var j = 0; j < rosterData.length; j++){
+      // do a new row
+      HWIDs = []
+      // to the left
+      unavailableL = [];
+      
+      for (var k = 0; k < numGrade; k++){
+        // find all the IDs above the current location
+        unavailableA = []; // reset each time because now on new column
+        for (var jj = 0; jj < finalspreadsheet.length; jj++){
+          unavailableA.push(finalspreadsheet[jj][k])}
+        
+        // count for the while loop
+        count = 0;
+        do{
+          randint = Math.floor(Math.random()*rosterData.length)
+          var randStudentID = rosterData[randint][4]
+          count++;
+          if (count > 100){ // arbitrary number of iterations (100 seems to work fast)
+            didntwork = 1;
+            break}}
+        while(randint == j || contains(unavailableL,randStudentID) || contains(unavailableA,randStudentID));
+        
+        // put that student we just found into the unavailable LEFT
+        unavailableL.push(randStudentID);
+        HWIDs.push(randStudentID);}  // push in a new column in this row
+      
+      finalspreadsheet.push(HWIDs);}} // push in a new row on the spreadsheet
+  
+  // now go through and take out the people who didn't submit the assignment
+  //--------------------------------------------------------------------------------
+  
+  // create a array of all the students who didn't submit the assignment
+  noSubmit = []
+  for (var i = 1; i < nosubmitData.length; i++){
+    if (nosubmitData[i][0] == "no files submitted"){
+      noSubmit.push(nosubmitData[i][4])}}
+  Logger.log("students who didnt submit the assignment: %s", noSubmit)
+  
+  // find the locations of where the non submissions exist in the finalspreadsheet
+  for (var q = 0; q < finalspreadsheet.length; q++){ // loop through the spreadsheet rows
+    for (var w = 0; w < noSubmit.length; w++) { // loop through the non submissions array
+      if (contains(finalspreadsheet[q],noSubmit[w])){
+        // index that needs to be changed
+        loc = find(finalspreadsheet[q],noSubmit[w])
+        
+        unavailable = []  // reset unavailable array
+        unavailable.push(rosterData[q][4])  // still can't let the student grade themselves
+        // put in all the ID number of those who didn't submit
+        for (var i = 0; i < noSubmit.length; i++){
+          unavailable.push(noSubmit[i])}
+        // put in all the ID numbers on the current row
+        for (var j = 0; j < finalspreadsheet[0].length; j++){
+          unavailable.push(finalspreadsheet[q][j])}
+        
+        // repeat until you find a suitable choice
+        do{
+          randint = Math.floor(Math.random()*rosterData.length)
+          var randStudentID = rosterData[randint][4]}
+        while(randint == j || contains(unavailable,randStudentID)); 
+        
+        finalspreadsheet[q][loc] = randStudentID}}} // replace the value in the spreadsheet
+  
+  
+  
+  
+  // Now that I have all the data ready, put it all into a new sheet on the spreadsheet
+  // This may have to be adjust if you have more or less peers to grade than 3
+  //----------------------------------------------------------------------------------------
+  peerAssignSheet.appendRow(["Last","First","Email","Grader","Peer1","Peer2","Peer3"])
+  for (var j = 0; j < rosterData.length; j++){
+    peerAssignSheet.appendRow([rosterData[j][0], rosterData[j][1],
+                               rosterData[j][3],rosterData[j][4],
+                               finalspreadsheet[j][0],
+                               finalspreadsheet[j][1],
+                               finalspreadsheet[j][2]])}
+  
+  
+  
+  // formatting peerAssign to make it look nice
+  var stepsRange = peerAssignSheet.getDataRange().offset(1, 0, peerAssignSheet.getLastRow() - 1); 
+  setAlternatingRowBackgroundColors_(stepsRange, '#ffffff', '#eeeeee');
+  peerAssignSheet.setFrozenRows(1)
+  peerAssignSheet.getRange(1, 1, 1, 7).setFontWeight('bold').setFontSize(11)
+  peerAssignSheet.autoResizeColumns(1, 7)  
+}
