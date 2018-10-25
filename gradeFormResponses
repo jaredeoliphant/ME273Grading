@@ -1,0 +1,222 @@
+/**
+* This is the function that will grade all the form responses
+*/
+function gradeFormResponses_() {
+  
+  // get all the data out that I need
+  // ------------------------------------------------------------------
+  var ss = SpreadsheetApp.getActiveSpreadsheet()
+  
+  //-----------make a new sheet only if needed-----------------------------------------
+  var copyResponses = ss.getSheetByName("Copy of Responses")
+  if(copyResponses){
+    var responsesData = copyResponses.getDataRange().getDisplayValues()} 
+  else{
+    Browser.msgBox("Copy Responses",
+                   "Couldn't find the desired sheet 'Copy of Responses', I'm going to replicate the original.",
+                   Browser.Buttons.OK)
+    ss.setActiveSheet(ss.getSheetByName("Form Responses"))
+    var copyResponses = ss.duplicateActiveSheet()
+    copyResponses.setName("Copy of Responses")
+    var responsesData = copyResponses.getDataRange().getDisplayValues()}
+  
+  
+  
+  //------Grade each line and get a score, grader, peer, and comment-----
+  //-------------------------------------------------------------------
+  var allScores = []; var allGraders = []; var allPeers = []; var allComments = []; var selfComments = [];
+  for(var i = 1; i < responsesData.length; i++){
+    sgpc = gradeOneLine(responsesData[i]) // score, grader, peer, comment
+    allScores.push(sgpc[0])
+    allGraders.push(sgpc[1])
+    allPeers.push(sgpc[2])
+    allComments.push(sgpc[3])
+    selfComments.push(sgpc[4])
+  }
+  
+  
+  Logger.log("allScores %s",allScores)
+  Logger.log("allGraders %s",allGraders)
+  Logger.log("allPeers %s",allPeers)
+  Logger.log("selfComments %s",selfComments)
+  
+  
+  
+  // add a "Final Grades" sheet unless it has already been added, then just clear it
+  var finalGrades = ss.getSheetByName("Final Grades")
+  if (!finalGrades){
+    var finalGrades = ss.insertSheet("Final Grades")}
+  else{
+    finalGrades.clear()}
+  
+  //header row
+  finalGrades.appendRow(["Last","First","netID","Email","HWID","Score","STD","#Graders","Grading pts","Final Score","Comments"])
+  finalGrades.setFrozenRows(1);
+  finalGrades.getRange(1, 1, 1, 11).setFontWeight('bold');
+  finalGrades.activate()
+  
+  var rosterSheet = ss.getSheetByName("Roster")
+  if (!rosterSheet){
+    Browser.msgBox("'Roster' doesn't exist. Cancelling script....")
+    return}
+  roster = rosterSheet.getDataRange().getValues()
+  
+  //----Sort through all the grades and attach them to the proper student--------
+  //-----------------------------------------------------------------------------
+  var didntgrade = ""
+  for(var s = 1; s < roster.length; s++){ // loop through the roster (omitting the header row)
+    
+    // deal with the wierd exponential guy
+    if (roster[s][4] == "`439170E30"){
+      HWID = "4.39E+35"}
+    else{
+      HWID = roster[s][4].slice(1)}
+    
+    
+    
+    //----Did this student do any grading?
+    if (!contains(allGraders,HWID))
+    {
+      didGrading = 0
+      //Logger.log("%s %s has not done any grading yet, email: %s",roster[s][1],roster[s][0],roster[s][3])
+      
+      didntgrade += roster[s][3] + ","
+    }
+    else{
+      didGrading = 5}
+    
+    
+    
+    //-----Has this student been graded yet?
+    if (!contains(allPeers,HWID))
+    {
+      //Logger.log("%s %s has not been graded yet",roster[s][3],roster[s][0])
+      finalGrades.appendRow([roster[s][0],roster[s][1],roster[s][2],roster[s][3],roster[s][4],"not graded yet","",didGrading,0])
+    }
+    else
+    {
+      locs = find(allPeers,HWID)
+      avgscore = 0;
+      studentComments = "Comments from your graders:\n---------------------------------"
+      //Logger.log("%s %s has been graded at %s",roster[s][1],roster[s][0],locs) // find where this particular student has been graded
+      studentscores = []
+      //----Average all the scores given to this student----
+      for (var l=0;l<locs.length;l++){
+        studentscores.push(allScores[locs[l]])
+        // concatenate comments together
+        studentComments += "\n" + allComments[locs[l]]}
+      Logger.log("studentscores %s",studentscores)
+      avgscore = mean(studentscores)
+      stdscore = std(studentscores)
+      
+      
+      //---Put the data into the "Final Grades" spreadsheet
+      finalGrades.appendRow([roster[s][0],roster[s][1],roster[s][2],roster[s][3],roster[s][4],avgscore,stdscore,locs.length,didGrading,didGrading+avgscore,studentComments])
+    }
+    
+    
+  }
+  Logger.log("these students didn't do any grading yet\n%s",didntgrade)
+  
+  
+  // pretty formatting
+  var stepsRange = finalGrades.getDataRange().offset(1, 0, finalGrades.getLastRow() - 1); 
+  setAlternatingRowBackgroundColors_(stepsRange, '#ffffff', '#eeeeee');
+  finalGrades.autoResizeColumns(1, 11)
+  
+  
+  
+  // add a histogram
+  var graderange = finalGrades.getRange(2, 10, finalGrades.getLastRow()-1)
+  var chart = finalGrades.newChart()
+  .setChartType(Charts.ChartType.HISTOGRAM)
+  .addRange(graderange)
+  .setPosition(finalGrades.getLastRow()+2, 5, 0, 0)
+  .build();
+  finalGrades.insertChart(chart);
+  
+  
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+//* This function will grade one line of the responses
+//*/
+function gradeOneLine(onerow){
+  
+  grader = onerow[2].toUpperCase()
+  peer = onerow[3].toUpperCase()
+  
+  //------Question 1 Compilable and free of errors--------
+  if (onerow[4] == "Yes. It works."){
+    score = 6}
+  else if (onerow[4] == "Yes, but I had to do small things to make it work on my compiler,"){
+    score = 3}
+  else{
+    score = 0}
+  
+  //------Question 2 Header-------------------------- 
+  if (onerow[5] == "Yes"){
+    score += 1}
+  
+  //------Question 3 Comments--------------------------
+  if (onerow[6] == "Yes"){
+    score += 1}
+  
+  //------Question 4 read/write to files-------------------  
+  if (onerow[7] == "Yes, both"){
+    score += 4}
+  else if (onerow[7] == "The .cpp could read but not write to an external file"){
+    score += 2}
+  else if (onerow[7] == "The .cpp could write but not read from an external file"){
+    score += 2}
+  
+  //------Question 5, multi check box-------------------------- 
+  // split the string into an array
+  var array_str = [{}];
+  var answer5 = onerow[8];
+  array_str = answer5.split(",");
+  
+  // Take out any leading spaces in the strings
+  for (var s = 0; s < array_str.length; s++){
+    if (array_str[s].slice(0,1) == " "){
+      array_str[s] = array_str[s].slice(1)}}
+
+  // check to see what strings are contained in the array
+  if (contains(array_str,"The decimal number is output correctly")){
+    score += 3}
+  if (contains(array_str,"The IEEE version of the number is output correctly")){
+    score += 3}
+  if (contains(array_str,"All of the numbers were output (30 rows with 2 columns or 60 rows with 1 column)")){
+    score += 1}
+  if (contains(array_str,"The numbers were in order and well-formatted")){
+    score += 1}
+
+  
+  //------Question 6, Grader Comments--------------------------
+  if (onerow[9] != ""){
+    comment = onerow[9]}
+  else{
+    comment = "none"}
+  
+    //------Question 7, Self Comments--------------------------
+  if (onerow[10] != ""){
+    selfcomment = onerow[10]}
+  else{
+    selfcomment = ""}
+  
+  // return 5 values
+  return [score,grader,peer,comment,selfcomment]
+}
