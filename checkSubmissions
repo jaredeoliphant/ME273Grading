@@ -59,6 +59,11 @@ function checkSubmissions_() {
       while (files.hasNext()){
         
         var file = files.next()
+        // make sure the file is not a google doc (because it will be converted to a PDF when sent in an email)
+        if (file.getMimeType() == "application/vnd.google-apps.document"){
+          nosubmitSheet.appendRow(["wrong file type",lastname,firstname,email,"`"+HWID1,file.getName(),file.getMimeType()])
+          break;
+        }
         // make sure it the right file
         if (file.getName() == filenames[ff]){
           foundone = foundone+ff+1;
