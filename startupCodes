@@ -1,11 +1,10 @@
-/**
-* When the spreadsheet is opened, it will create a menu
-* on the top bar that will give the user the ability to run the functions
+/*
+When the spreadsheet is opened, it will create a menu
+on the top bar that will give the user the ability to run the functions
 */
 function onOpen(){
   SpreadsheetApp.getUi()
   .createMenu('ME273 Grading Codes')
-  
   .addItem('Step 1. Check who submitted', 'checkSubmissions_')
   .addSeparator()
   .addItem('Step 2. Generate random grading assignmentsd', 'generatePeerGradingAssignments_')
@@ -15,17 +14,12 @@ function onOpen(){
   .addItem('Step 4. Grade all of the Form Responses', 'gradeFormResponses_')
   .addSeparator()
   .addItem('Step 5. Send an email to everyone with their comments attached', 'sendFeedbackEmails_')
-  .addSeparator()
-  .addItem('test script', 'testing')
-  .addSeparator()
-  .addItem('Tutorial/Help', 'tutorial_')
-  .addSeparator()
   .addToUi();
 }
 
 
-/**
-* This function is needed to tell us if the element is contained in the array
+/*
+This function is needed to tell us if the element is contained in the array
 */
 function contains(arr,element){
   for (var i = 0; i < arr.length; i++){
@@ -34,8 +28,8 @@ function contains(arr,element){
   return false;
 }
 
-/**
-* This function will return all the locations of the element in the array
+/*
+This function will return all the locations of the element in the array
 */
 function find(arr,element){
   if (!contains(arr,element)){
@@ -43,20 +37,18 @@ function find(arr,element){
   locations = []
   for (var i = 0; i < arr.length; i++){
     if (element == arr[i]){
-      locations.push(i)
-    }
-  }
+      locations.push(i)}}
   return locations
 }
 
 
-/**
-* Sets the background colors for alternating rows within the range.
-* @param {Range} range The range to change the background colors of.
-* @param {string} oddColor The color to apply to odd rows (relative to the
-*     start of the range).
-* @param {string} evenColor The color to apply to even rows (relative to the
-*     start of the range).
+/*
+Sets the background colors for alternating rows within the range.
+@param {Range} range The range to change the background colors of.
+@param {string} oddColor The color to apply to odd rows (relative to the
+     start of the range).
+@param {string} evenColor The color to apply to even rows (relative to the
+    start of the range).
 */
 function setAlternatingRowBackgroundColors_(range, oddColor, evenColor) {
   var backgrounds = [];
@@ -64,23 +56,22 @@ function setAlternatingRowBackgroundColors_(range, oddColor, evenColor) {
     var rowBackgrounds = [];
     for (var column = 1; column <= range.getNumColumns(); column++) {
       if (row % 2 == 0) {
-        rowBackgrounds.push(evenColor);
-      } else {
-        rowBackgrounds.push(oddColor);
-      }
-    }
-    backgrounds.push(rowBackgrounds);
-  }
+        rowBackgrounds.push(evenColor);} 
+      else {
+        rowBackgrounds.push(oddColor);}}
+    backgrounds.push(rowBackgrounds);}
   range.setBackgrounds(backgrounds);
 }
 
-
+/*Simple mean function*/
 function mean(arr){
   sum = 0;
   for (var i = 0; i < arr.length; i++){
     sum += arr[i]}
-  return sum/arr.length}
+  return sum/arr.length
+}
 
+/*Standard deviation function*/
 function std(arr){
   if (arr.length == 1){return 0}
   if (arr.length*arr[0] == summ(arr)){return 0}
@@ -93,8 +84,10 @@ function std(arr){
   return Math.sqrt(meansq)
 }
 
+/*Simple summing function*/
 function summ(arr){
   sum = 0
   for (var i=0; i< arr.length; i++){
     sum += arr[i]}
-  return sum}
+  return sum
+}
