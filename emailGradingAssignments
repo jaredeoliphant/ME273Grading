@@ -1,0 +1,107 @@
+/**
+* This is the function that will email everyone the grading assignments
+*/
+function emailGradingAssignments_() {
+  
+  //Send a warning to the user to ensure this doesn't happen too often
+  var input = Browser.msgBox("CAREFUL!",
+                             "This script will send an email to all the students with their peer grading assignment. Be sure you have updated the email message that will be sent. Are you sure you want to run this?",
+                             Browser.Buttons.YES_NO)
+  
+  if (input == "no"){
+    return}
+  
+  // get the data out of the spreadsheet
+  var ss = SpreadsheetApp.getActiveSpreadsheet()
+  var sheet = ss.getSheetByName("Peer Grading Assignments")
+  if (!sheet){
+    Browser.msgBox("'Peer Grading Assignments' doesn't exist. Be sure you run the 'Generate random peer grading assignments' script first. Cancelling script...")
+    return}
+  var data = sheet.getDataRange().getValues()
+  email = 'jaredeoliphant@gmail.com'  // test email
+  sheet.activate()
+  
+  if (MailApp.getRemainingDailyQuota() < (data.length - 1)){
+    Browser.msgBox("ERROR","You have exceeded your daily quota for the amount of emails Google will let you send in a day. Either wait till tomorrow or log in under a different email address",Browser.Buttons.OK)
+    return}
+  
+  // loop through for each student
+  for (var j = 1; j<data.length;j++){  //1 <= j < 94 
+    
+    var rowData = data[j]; // this is what will iterate when we move to the next student
+    
+    // info about the student
+    lastname = rowData[0]
+    firstname = rowData[1]
+    studentemail = rowData[2]
+    GraderHWID = rowData[3]
+    
+    // info about what 3 files to grade
+    PeerHWID1 = rowData[4]
+    PeerHWID2 = rowData[5]
+    PeerHWID3 = rowData[6]
+    
+    // change the variable names to take out the '`' symbol that was used to make sure they stay as strings in the spreadsheet
+    PID1 = ""
+    PID2 = ""
+    PID3 = ""
+    
+    for (var i=1;i<10;i++){
+      PID1 += PeerHWID1[i]
+      PID2 += PeerHWID2[i]
+      PID3 += PeerHWID3[i]
+    }
+    
+    //Logger.log(lastname + " " + PID1 + " " + PID2+ " " +PID3)
+    attach = [];
+    filenames = ['main_'+PID1+'_HW05.cpp',
+                 'main_'+PID2+'_HW05.cpp',
+                 'main_'+PID3+'_HW05.cpp',]
+    
+    // find all the files that we need to send to this student
+    for (var p=0;p<filenames.length;p++){
+      var files = DriveApp.getFilesByName(filenames[p]);
+      while(files.hasNext()){
+        var file= files.next()
+        if (file.getName() == filenames[p]){
+          attach.push(file.getBlob());
+          break;}}}
+    
+    if (attach.length != filenames.length)
+    {Logger.log(lastname + " " + PID1 + " " + PID2+ " " +PID3)
+    Logger.log("ERROR: This student is not going to get the right number of files")
+    Logger.log(attach)
+    Logger.log(" ")}
+    
+    // subject line
+    subject = 'ME 273: Peer Grading Assignment for HW05'
+    
+    // extract their full name for the header 
+    name = firstname + ' ' + lastname + ',\n\n';
+    
+    
+    // instructions
+    instruct = 'Please grade the following three (3) Homework Assignments from your peers. \nYou should see a main.cpp file for '+PID1+', '+PID2+', and '+PID3+'.\n';
+    instruct += 'After you are finished grading you will need to submit a google form for each one of the students that you graded. The rubric and answers will be included in the google form. \n';
+    instruct += 'Be sure that you enter the proper Homework ID for you as well as your peers, otherwise it cannot be graded accurately. \n';
+    instruct += "If you don't see all 3 files it is because they either didn't submit it or used an incorrect naming convention. Please grade the portions that you are able to.\n";
+    //instruct += "The deadline for the completion of the grading will be...   \n";
+    // link to the google form to do the grading
+    formlink = '\n\nGoogle form: \nhttps://goo.gl/forms/FUze6jJlCDG70VsB2';
+    
+    tag = '\n\n\nIf you have any problems opening the files or getting on to the google form please email Jared at jaredeoliphant@gmail.com \n';
+    
+    // concatenate the message together
+    message = name + instruct + formlink + tag
+    //Logger.log(message)
+    // Logger.log(attach)
+    
+    
+    // Careful with this. You only get 100 emails a day so be sure it is right 
+    // before you uncomment this and send it off
+    // email is a test case that will send it to jaredeoliphant@gmail.com
+    // studentemail is the real deal.
+    
+    MailApp.sendEmail(studentemail,subject,message,{attachments: attach});
+  }
+}
