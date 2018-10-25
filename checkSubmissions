@@ -1,6 +1,6 @@
-/**
-* Function that will search the google drive for submissions from each student
-* for the files listed in the variable 'filenames'
+/*
+Function that will search the google drive for submissions from each student
+for the files listed in the variable 'filenames'
 */
 function checkSubmissions_() {
   var ss = SpreadsheetApp.getActiveSpreadsheet()
@@ -13,17 +13,21 @@ function checkSubmissions_() {
   var rosterData = roster.getDataRange().getValues();
   
   
-  // if "No of Late Submissions" already exists we should clear it and make a new one
+  // if "No/Late Submissions" already exists we should clear it and make a new one
   var nosubmitSheet = ss.getSheetByName("No/Late Submissions")
   if (!nosubmitSheet){
     var nosubmitSheet = ss.insertSheet("No/Late Submissions");}
   else{
     nosubmitSheet.clear()}
+  
+  // current time
   var now = new Date()
-  nosubmitSheet.appendRow(["Status as of "+now,"Last","First","Email","HWID","Filename","Minutes late"])
+  
+  //append the sheet header
+  nosubmitSheet.appendRow(["Status as of "+now,"Last","First","Email","HWID","Minutes late / filetype"])
   nosubmitSheet.activate()
   
-  
+  // Loop through the roster and find the appropiate files 
   for (var j = 1; j < rosterData.length; j++){
     
     var rowData = rosterData[j]; // one row
@@ -32,28 +36,25 @@ function checkSubmissions_() {
     firstname = rowData[1]
     netID = rowData[2]
     email = rowData[3]
-    HWID = rowData[4]
+    HWID1 = rowData[4]
     
     // change the variable names to take out the '`' symbol that was used to make sure they stay as strings in the spreadsheet
-    HWID1 = ""
+    HWID = ""
     for (var i=1;i<10;i++){
-      HWID1 += HWID[i]}
+      HWID += HWID1[i]}
     
     
     /**
     * filenames and duedate are the only things that should be updated for a new HW
     ********************************************************/
-    filenames = ['main_'+HWID1+'_HW05.cpp']
-    var duedate = new Date('October 11, 2018 00:00:00 -0600');
+    filenames = ['main_'+HWID+'_HW07.cpp']
+    var duedate = new Date('October 30, 2018 00:00:00 -0600');   // the -0600 puts it in the right time zone for Utah
     /*******************************************************/
     
-    
-    
-    
     foundone = 0
-    // find the files
+    // loop through the desired files
     for (var ff=0; ff<filenames.length; ff++){
-      
+      // all of the files that matche the name
       var files = DriveApp.getFilesByName(filenames[ff]);
       
       while (files.hasNext()){
@@ -61,7 +62,7 @@ function checkSubmissions_() {
         var file = files.next()
         // make sure the file is not a google doc (because it will be converted to a PDF when sent in an email)
         if (file.getMimeType() == "application/vnd.google-apps.document"){
-          nosubmitSheet.appendRow(["wrong file type",lastname,firstname,email,"`"+HWID1,file.getName(),file.getMimeType()])
+          nosubmitSheet.appendRow(["wrong file type",lastname,firstname,email,"`"+HWID,file.getMimeType()])
           break;
         }
         // make sure it the right file
@@ -69,20 +70,14 @@ function checkSubmissions_() {
           foundone = foundone+ff+1;
           // is it late?
           if ((file.getDateCreated()-duedate) > 0){
-            nosubmitSheet.appendRow(["late submission",lastname,firstname,email,"`"+HWID1,file.getName(),
-                                     -(duedate-file.getDateCreated())/60000])
-          }
-        }
-        else{
-          nosubmitSheet.appendRow(["incorrect naming",lastname,firstname,email,"`"+HWID1,file.getName()])          
-        }
+            nosubmitSheet.appendRow(["late submission",lastname,firstname,email,"`"+HWID,-(duedate-file.getDateCreated())/60000])}}
       }
     }
     
     if (foundone == 0){
       // this person didn't submit any files
-      nosubmitSheet.appendRow(["no files submitted",lastname,firstname,email,"`"+HWID1])    
-    }
+      nosubmitSheet.appendRow(["no files submitted",lastname,firstname,email,"`"+HWID])}
+  
   }
   
   
