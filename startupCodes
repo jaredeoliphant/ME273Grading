@@ -7,7 +7,7 @@ function onOpen(){
   .createMenu('ME273 Grading Codes')
   .addItem('Step 1. Check who submitted', 'checkSubmissions_')
   .addSeparator()
-  .addItem('Step 2. Generate random grading assignmentsd', 'generatePeerGradingAssignments_')
+  .addItem('Step 2. Generate random grading assignments', 'generatePeerGradingAssignments_')
   .addSeparator()
   .addItem('Step 3. Email out grading assignments', 'emailGradingAssignments_')
   .addSeparator()
