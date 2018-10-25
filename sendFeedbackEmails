@@ -1,0 +1,41 @@
+function sendFeedbackEmails_(){
+  
+  // Send a warning to the user to ensure this doesn't happen too often
+  var input = Browser.msgBox("CAREFUL!",
+                             "This script will send an email to all the students with the comments given to them. \nAre you sure you want to run this?",
+                             Browser.Buttons.YES_NO)
+  
+  if (input == "no")
+    return
+    
+    ss = SpreadsheetApp.getActiveSpreadsheet()
+    
+    var finalgrades = ss.getSheetByName("Final Grades")
+    
+    if (!finalgrades){
+      Browser.msgBox("Error", "I need the 'Final Grades' sheet before I can send grades out to everybody. \nBe sure you run the Grading script first", Browser.Buttons.OK)
+      return}
+  
+  var grades = finalgrades.getDataRange().getValues()
+  finalgrades.activate()
+  
+  if (MailApp.getRemainingDailyQuota() < grades.length){
+    Browser.msgBox("I can't send all of the emails today")
+    return}
+  
+  message = "Here is the feedback given to you from your peers.\n\n"
+  for (var j = 1; j< grades.length; j++){
+    
+    emailmessage = ""
+    comment = grades[j][10]
+    emailmessage += grades[j][1] + " " + grades[j][0] + ",\n\n" + "Homework 5 has been graded by your fellow students and the results are now posted to Learning Suite.\n"
+    emailmessage += message
+    emailmessage += comment 
+    emailmessage += "\n\nIf you have any questions or concerns feel free to email Jared at jaredeoliphant@gmail.com"
+    
+    subject = "ME273: Peer Feedback from HW05"
+    Logger.log(emailmessage)
+    MailApp.sendEmail(grades[j][3], subject, emailmessage)
+  }
+  
+}
