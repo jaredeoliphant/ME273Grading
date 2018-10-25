@@ -20,7 +20,7 @@ function generatePeerGradingAssignments_() {
   // check and make sure that "No/Late Submissions" exists
   var nosubmitSheet = ss.getSheetByName("No/Late Submissions")
   if (!nosubmitSheet){
-    Browser.msgBox("No/Late Submissions doesn't exist", "Expected to see a sheet named 'No/Late Submissions', make sure you run 'Check who submitted first. cancelling the script...", Browser.Buttons.OK)
+    Browser.msgBox("No/Late Submissions doesn't exist", "Expected to see a sheet named 'No/Late Submissions', make sure you run 'Check who submitted' first. cancelling the script...", Browser.Buttons.OK)
     return}
   var nosubmitData = nosubmitSheet.getDataRange().getValues()
   
@@ -39,8 +39,6 @@ function generatePeerGradingAssignments_() {
   ********************************************************/
   var numGrade = 3;
   /*******************************************************/
-  
-  
   
   
   // First, create the peer assignments grading assuming that everyone submitted 
@@ -119,7 +117,7 @@ function generatePeerGradingAssignments_() {
   
   
   // Now that I have all the data ready, put it all into a new sheet on the spreadsheet
-  // This may have to be adjust if you have more or less peers to grade than 3
+  // This may have to be adjusted if you have more or less peers to grade than 3
   //----------------------------------------------------------------------------------------
   peerAssignSheet.appendRow(["Last","First","Email","Grader","Peer1","Peer2","Peer3"])
   for (var j = 0; j < rosterData.length; j++){
@@ -128,8 +126,6 @@ function generatePeerGradingAssignments_() {
                                finalspreadsheet[j][0],
                                finalspreadsheet[j][1],
                                finalspreadsheet[j][2]])}
-  
-  
   
   // formatting peerAssign to make it look nice
   var stepsRange = peerAssignSheet.getDataRange().offset(1, 0, peerAssignSheet.getLastRow() - 1); 
