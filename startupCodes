@@ -24,7 +24,6 @@ function onOpen(){
 }
 
 
-
 /**
 * This function is needed to tell us if the element is contained in the array
 */
