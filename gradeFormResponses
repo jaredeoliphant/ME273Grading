@@ -10,12 +10,14 @@ function gradeFormResponses_() {
   //-----------get the responses data-----------------------------------------
   var responsesData = ss.getSheetByName("Form Responses").getDataRange().getDisplayValues()
   
+  
   //------Grade each line and get a score, grader, peer, and comment-----
   //-------------------------------------------------------------------
   var allScores = []; var allGraders = []; var allPeers = []; var allComments = []; var selfComments = [];
   for(var i = 1; i < responsesData.length; i++){
     sgpc = gradeOneLine(responsesData[i]) // score, grader, peer, comment
-    allScores.push(sgpc[0])
+    totalscore = summ(sgpc[0])
+    allScores.push(totalscore)
     allGraders.push(sgpc[1])
     allPeers.push(sgpc[2])
     allComments.push(sgpc[3])
@@ -23,10 +25,10 @@ function gradeFormResponses_() {
   }
   
   
-  Logger.log("allScores %s",allScores)
-  Logger.log("allGraders %s",allGraders)
-  Logger.log("allPeers %s",allPeers)
-  Logger.log("selfComments %s",selfComments)
+  //  Logger.log("allScores %s",allScores)
+  //  Logger.log("allGraders %s",allGraders)
+  //  Logger.log("allPeers %s",allPeers)
+  //  Logger.log("selfComments %s",selfComments)
   
   
   
@@ -48,6 +50,8 @@ function gradeFormResponses_() {
     Browser.msgBox("'Roster' doesn't exist. Cancelling script....")
     return}
   roster = rosterSheet.getDataRange().getValues()
+  
+  
   
   //----Sort through all the grades and attach them to the proper student--------
   //-----------------------------------------------------------------------------
@@ -79,7 +83,7 @@ function gradeFormResponses_() {
     if (!contains(allPeers,HWID))
     {
       //Logger.log("%s %s has not been graded yet",roster[s][3],roster[s][0])
-      finalGrades.appendRow([roster[s][0],roster[s][1],roster[s][2],roster[s][3],roster[s][4],"not graded yet","",didGrading,0])
+      finalGrades.appendRow([roster[s][0],roster[s][1],roster[s][2],roster[s][3],roster[s][4],"not graded yet","","",didGrading,0])
     }
     else
     {
@@ -97,6 +101,9 @@ function gradeFormResponses_() {
       avgscore = mean(studentscores)
       stdscore = std(studentscores)
       
+      
+      
+      // Deal with a few special cases for this hw only
       
       //---Put the data into the "Final Grades" spreadsheet
       finalGrades.appendRow([roster[s][0],roster[s][1],roster[s][2],roster[s][3],roster[s][4],avgscore,stdscore,locs.length,didGrading,didGrading+avgscore,studentComments])
@@ -125,6 +132,7 @@ function gradeFormResponses_() {
   
   
 }
+
 
 
 
