@@ -138,38 +138,47 @@ function gradeFormResponses_() {
 
 
 
-
 /**
 //* This function will grade one line of the responses
 //*/
 function gradeOneLine(onerow){
-  
+  scores = []
   grader = onerow[2].toUpperCase()
   peer = onerow[3].toUpperCase()
   
   //------Question 1 Compilable and free of errors--------
   if (onerow[4] == "Yes. It works."){
-    score = 6}
+    scores[0] = 6}
   else if (onerow[4] == "Yes, but I had to do small things to make it work on my compiler,"){
-    score = 3}
+    scores[0] = 3}
   else{
-    score = 0}
+    scores[0] = 0}
   
   //------Question 2 Header-------------------------- 
   if (onerow[5] == "Yes"){
-    score += 1}
+    scores[1] = 1}
+  else{
+    scores[1] = 0}
   
   //------Question 3 Comments--------------------------
   if (onerow[6] == "Yes"){
-    score += 1}
+    scores[2] = 1}
+  else{
+    scores[2] = 0}
+  
   
   //------Question 4 read/write to files-------------------  
-  if (onerow[7] == "Yes, both"){
-    score += 4}
-  else if (onerow[7] == "The .cpp could read but not write to an external file"){
-    score += 2}
-  else if (onerow[7] == "The .cpp could write but not read from an external file"){
-    score += 2}
+  if (onerow[7] == "Yes, the .cpp could read from and write from files as well as allowing user input"){
+    scores[3] = 4}
+  else if (onerow[7] == "The .cpp didn't read or write to an external file, but did allow user input"){
+    scores[3] = 2}
+  else if (onerow[7] == "The .cpp could write and read to an external file, but didn't allow user input"){
+    scores[3] = 2}
+  else if (onerow[7] == "The student could read and write as well as allowing user input, but in separate .cpp files"){
+    scores[3] = 1}
+  else{
+    scores[3] = 0}
+  
   
   //------Question 5, multi check box-------------------------- 
   // split the string into an array
@@ -181,17 +190,18 @@ function gradeOneLine(onerow){
   for (var s = 0; s < array_str.length; s++){
     if (array_str[s].slice(0,1) == " "){
       array_str[s] = array_str[s].slice(1)}}
-
+  
+  scores[4] = 0
   // check to see what strings are contained in the array
-  if (contains(array_str,"The decimal number is output correctly")){
-    score += 3}
-  if (contains(array_str,"The IEEE version of the number is output correctly")){
-    score += 3}
-  if (contains(array_str,"All of the numbers were output (30 rows with 2 columns or 60 rows with 1 column)")){
-    score += 1}
-  if (contains(array_str,"The numbers were in order and well-formatted")){
-    score += 1}
-
+  if (contains(array_str,"The square root is output correctly")){
+    scores[4] += 3}
+  if (contains(array_str,"The square root is correct to within 0.00001 of the true answer")){
+    scores[4] += 3}
+  if (contains(array_str,"The program can calculate the square root of doubles")){
+    scores[4] += 1}
+  if (contains(array_str,"The program finds a way to resolve issues derived from negative inputs")){
+    scores[4] += 1}
+  
   
   //------Question 6, Grader Comments--------------------------
   if (onerow[9] != ""){
@@ -199,12 +209,12 @@ function gradeOneLine(onerow){
   else{
     comment = "none"}
   
-    //------Question 7, Self Comments--------------------------
+  //------Question 7, Self Comments--------------------------
   if (onerow[10] != ""){
     selfcomment = onerow[10]}
   else{
     selfcomment = ""}
   
   // return 5 values
-  return [score,grader,peer,comment,selfcomment]
+  return [scores,grader,peer,comment,selfcomment]
 }
