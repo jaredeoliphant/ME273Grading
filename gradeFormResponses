@@ -7,20 +7,8 @@ function gradeFormResponses_() {
   // ------------------------------------------------------------------
   var ss = SpreadsheetApp.getActiveSpreadsheet()
   
-  //-----------make a new sheet only if needed-----------------------------------------
-  var copyResponses = ss.getSheetByName("Copy of Responses")
-  if(copyResponses){
-    var responsesData = copyResponses.getDataRange().getDisplayValues()} 
-  else{
-    Browser.msgBox("Copy Responses",
-                   "Couldn't find the desired sheet 'Copy of Responses', I'm going to replicate the original.",
-                   Browser.Buttons.OK)
-    ss.setActiveSheet(ss.getSheetByName("Form Responses"))
-    var copyResponses = ss.duplicateActiveSheet()
-    copyResponses.setName("Copy of Responses")
-    var responsesData = copyResponses.getDataRange().getDisplayValues()}
-  
-  
+  //-----------get the responses data-----------------------------------------
+  var responsesData = ss.getSheetByName("Form Responses").getDataRange().getDisplayValues()
   
   //------Grade each line and get a score, grader, peer, and comment-----
   //-------------------------------------------------------------------
