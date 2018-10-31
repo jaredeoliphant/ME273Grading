@@ -154,6 +154,13 @@ function gradeOneLine(onerow){
   grader = onerow[2].toUpperCase()
   peer = onerow[3].toUpperCase()
   
+  
+  // Take out any leading spaces in the grader and peer strings  
+  if (grader.slice(0,1) == " "){
+    grader = grader.slice(1)}
+  if (peer.slice(0,1) == " "){
+    peer = peer.slice(1)}
+  
   //------Question 1 Compilable and free of errors--------
   if (onerow[4] == "Yes. It works."){
     scores[0] = 6}
