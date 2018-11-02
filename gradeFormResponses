@@ -13,17 +13,20 @@ function gradeFormResponses_() {
   
   //------Grade each line and get a score, grader, peer, and comment-----
   //-------------------------------------------------------------------
-  var allScores = []; var allGraders = []; var allPeers = []; var allComments = []; var selfComments = [];
+  var allScores = []; var allGraders = []; var allPeers = []; var allComments = []; var selfComments = []; var scoresMatrix = [];
   for(var i = 1; i < responsesData.length; i++){
-    sgpc = gradeOneLine(responsesData[i]) // score, grader, peer, comment
-    totalscore = summ(sgpc[0])
-    allScores.push(totalscore)
+    sgpc = gradeOneLine(responsesData[i]) // scores, grader, peer, comment
+    scoresMatrix.push(sgpc[0])
+    allScores.push(summ(sgpc[0]))
     allGraders.push(sgpc[1])
     allPeers.push(sgpc[2])
     allComments.push(sgpc[3])
     selfComments.push(sgpc[4])
   }
   
+    
+  // Send the entire score matrix over to another function to make a new spreadsheet
+  createScoreSheet(scoresMatrix,allGraders,allPeers,allComments)
   
   //  Logger.log("allScores %s",allScores)
   //  Logger.log("allGraders %s",allGraders)
@@ -154,12 +157,12 @@ function gradeOneLine(onerow){
   grader = onerow[2].toUpperCase()
   peer = onerow[3].toUpperCase()
   
-  
-  // Take out any leading spaces in the grader and peer strings  
+ // Take out any leading spaces in the grader and peer strings  
   if (grader.slice(0,1) == " "){
     grader = grader.slice(1)}
   if (peer.slice(0,1) == " "){
     peer = peer.slice(1)}
+  
   
   //------Question 1 Compilable and free of errors--------
   if (onerow[4] == "Yes. It works."){
