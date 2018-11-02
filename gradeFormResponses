@@ -168,7 +168,7 @@ function gradeOneLine(onerow){
   if (onerow[4] == "Yes. It works."){
     scores[0] = 6}
   else if (onerow[4] == "Yes, but I had to do small things to make it work on my compiler,"){
-    scores[0] = 3}
+    scores[0] = 5}
   else{
     scores[0] = 0}
   
