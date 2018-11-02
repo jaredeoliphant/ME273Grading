@@ -9,15 +9,16 @@ function createScoreSheet(scores,graders,peers,comments) {
     sMatrix.clear()}
   sMatrix.activate()
   
+  
   // Append the header:
-  sMatrix.appendRow(["Grader","Peer","Question 1","Question 2","Question 3","Question 4","Question 5","Total","Comments"])
+  sMatrix.appendRow(["Peer","Grader","Question 1","Question 2","Question 3","Question 4","Question 5","Total","Comments"])
   for (var i = 0; i < graders.length; i++){
     
     // deal with the wierd exponential guy
     if (graders[i] == "4.39E+35"){graders[i] = "439170E30"}
     if (peers[i] == "4.39E+35"){peers[i] = "439170E30"}
     
-    var oneRow = ["`"+graders[i], "`"+peers[i]];
+    var oneRow = ["`"+peers[i], "`"+graders[i]];
     
     for (var j = 0; j < scores[i].length; j++){
       oneRow.push(scores[i][j])
@@ -29,12 +30,13 @@ function createScoreSheet(scores,graders,peers,comments) {
   
   // sort by peer (or by grader if desired)
   var stepsRange = sMatrix.getDataRange().offset(1, 0, sMatrix.getLastRow() - 1); 
-  stepsRange.sort(2) // sort by the second column
+  stepsRange.sort(1) // sort by the second column
   
   // pretty formatting
   setAlternatingRowBackgroundColors_(stepsRange, '#ffffff', '#eeeeee');
   sMatrix.getRange(1, 1, 1, 9).setFontWeight('bold').setFontSize(11)
   sMatrix.autoResizeColumns(1, 9)
   sMatrix.setFrozenRows(1)
+ 
   
 }
