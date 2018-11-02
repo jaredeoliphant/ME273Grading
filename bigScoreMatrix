@@ -14,8 +14,8 @@ function createScoreSheet(scores,graders,peers,comments) {
   for (var i = 0; i < graders.length; i++){
     
     // deal with the wierd exponential guy
-    if (grader[i] == "4.39E+35"){grader[i] = "439170E30"}
-    if (peer[i] == "4.39E+35"){peer[i] = "439170E30"}
+    if (graders[i] == "4.39E+35"){graders[i] = "439170E30"}
+    if (peers[i] == "4.39E+35"){peers[i] = "439170E30"}
     
     var oneRow = ["`"+graders[i], "`"+peers[i]];
     
