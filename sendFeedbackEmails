@@ -1,41 +1,78 @@
 function sendFeedbackEmails_(){
   
-  // Send a warning to the user to ensure this doesn't happen too often
+  //Send a warning to the user to ensure this doesn't happen too often
   var input = Browser.msgBox("CAREFUL!",
                              "This script will send an email to all the students with the comments given to them. \nAre you sure you want to run this?",
                              Browser.Buttons.YES_NO)
   
-  if (input == "no")
-    return
-    
-    ss = SpreadsheetApp.getActiveSpreadsheet()
-    
-    var finalgrades = ss.getSheetByName("Final Grades")
-    
-    if (!finalgrades){
-      Browser.msgBox("Error", "I need the 'Final Grades' sheet before I can send grades out to everybody. \nBe sure you run the Grading script first", Browser.Buttons.OK)
-      return}
+  if (input == "no"){return}
+  
+  ss = SpreadsheetApp.getActiveSpreadsheet()
+  
+  var finalgrades = ss.getSheetByName("Final Grades")
+  
+  // Error if the final grades sheet has not been created yet
+  if (!finalgrades){
+    Browser.msgBox("Error", "I need the 'Final Grades' sheet before I can send grades out to everybody. \nBe sure you run the Grading script first", Browser.Buttons.OK)
+    return}
   
   var grades = finalgrades.getDataRange().getValues()
   finalgrades.activate()
   
+  // Error if we've exceeded the email quota for the day
   if (MailApp.getRemainingDailyQuota() < grades.length){
     Browser.msgBox("I can't send all of the emails today")
     return}
   
-  message = "Here is the feedback given to you from your peers.\n\n"
+  // Get all the form responses to send out to each student
+  var allResponses = ss.getSheetByName("Form Responses").getDataRange().getValues()
+  
+  // the header of the form responses sheet
+  var questions = allResponses[0]
+  
+  // just the homework IDs
+  var aa = []
+  for (var i = 1; i<allResponses.length; i++){
+    aa.push("`"+allResponses[i][3])}
+  
+  // Create the email message including all relevant form responses
+  message = "Here are the complete form responses submitted for you from your peers.\n"
+  message += "==========================================================\n\n"
+  
   for (var j = 1; j< grades.length; j++){
     
-    emailmessage = ""
-    comment = grades[j][10]
-    emailmessage += grades[j][1] + " " + grades[j][0] + ",\n\n" + "Homework 5 has been graded by your fellow students and the results are now posted to Learning Suite.\n"
-    emailmessage += message
-    emailmessage += comment 
-    emailmessage += "\n\nIf you have any questions or concerns feel free to email Jared at jaredeoliphant@gmail.com"
+    // locations of form responses that should be attached to this particular student
+    locs = find(aa,grades[j][4])
+    form = ""
     
-    subject = "ME273: Peer Feedback from HW05"
+    // if the student hasn't been graded this loop will be skipped entirely
+    for (var i=0; i<locs.length; i++){
+      
+      // each question and answer
+      form += questions[4] + "\n\t" + allResponses[locs[i]+1][4] + "\n"
+      form += questions[5] + "\n\t" + allResponses[locs[i]+1][5] + "\n"
+      form += questions[6] + "\n\t" + allResponses[locs[i]+1][6] + "\n"
+      form += questions[7] + "\n\t" + allResponses[locs[i]+1][7] + "\n"
+      form += "5. " + questions[8] + "\n\t" + allResponses[locs[i]+1][8] + "\n"
+      form += "6. " + questions[9] + "\n\t" + allResponses[locs[i]+1][9] + "\n"
+      form += "==========================================================\n\n"
+    }
+    
+    
+    // finishing up the email message
+    emailmessage = ""
+    emailmessage += grades[j][1] + " " + grades[j][0] + ",\n\n" + "Homework 7 has been graded by your fellow students and the results are now posted to Learning Suite.\n\n"
+    emailmessage += "Your final score is: " + grades[j][9] + "/25\n"
+    emailmessage += "\n\nIf you have any questions or concerns feel free to email Jared at jaredeoliphant@gmail.com\n\n\n"
+    
+    
+    emailmessage += message + form
     Logger.log(emailmessage)
-    MailApp.sendEmail(grades[j][3], subject, emailmessage)
+    subject = "ME273: Peer Feedback from HW07"
+    
+    // Send out the email. be careful!
+    // testemail = 'jaredeoliphant@gmail.com
+    //    MailApp.sendEmail(grades[j][3], subject, emailmessage) //testemail or grades[j][3]
   }
   
 }
