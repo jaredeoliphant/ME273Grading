@@ -48,7 +48,7 @@ function checkSubmissions_() {
     * filenames and duedate are the only things that should be updated for a new HW
     ********************************************************/
     filenames = ['main_'+HWID+'_HW07.cpp']
-    var duedate = new Date('October 30, 2018 00:00:00 -0600');   // the -0600 puts it in the right time zone for Utah
+    var duedate = new Date('October 30, 2018 00:00:00 -0600');   // the -0600 puts it in the right time zone for Utah (-0700 after daylight savings time is over)
     /*******************************************************/
     
     foundone = 0
