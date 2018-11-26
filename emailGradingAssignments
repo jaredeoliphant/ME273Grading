@@ -25,7 +25,7 @@ function emailGradingAssignments_() {
     return}
   
   // loop through for each student
-  for (var j = 1; j<data.length;j++){  //1 <= j < 94 
+  for (var j = 1; j<data.length;j++){  //1 <= j < data.length
     
     var rowData = data[j]; // this is what will iterate when we move to the next student
     
