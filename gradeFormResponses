@@ -86,7 +86,7 @@ function gradeFormResponses_() {
     if (!contains(allPeers,HWID))
     {
       //Logger.log("%s %s has not been graded yet",roster[s][3],roster[s][0])
-      finalGrades.appendRow([roster[s][0],roster[s][1],roster[s][2],roster[s][3],roster[s][4],"not graded yet","","",didGrading,0])
+      finalGrades.appendRow([roster[s][0],roster[s][1],roster[s][2],roster[s][3],roster[s][4],"not graded yet","","",didGrading,didGrading])
     }
     else
     {
